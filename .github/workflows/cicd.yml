@@ -1,0 +1,35 @@
+name: CI/CD Pipeline Automation
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  # STAGE 1: Source (Cloning)
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+  # STAGE 2: Build (Compile & Containerize)
+  build:
+    needs: source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Build Docker Image
+        run: |
+          docker build -t todo-app:${{ github.sha }} .
+          echo "Image built successfully"
+
+  # STAGE 3: Deploy (Verification)
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Staging
+        run: |
+          echo "Deploying ${{ github.sha }} to Staging Environment..."
+          # This simulates the ECS deployment step
+          printf '{"status":"deployed","version":"%s"}' ${{ github.sha }} > deployment-status.json
+          cat deployment-status.json
